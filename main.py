@@ -1,3 +1,227 @@
+  import os
+import sys
+import time
+import socket
+import threading
+import subprocess
+import shutil
+from pathlib import Path
+import tkinter as tk
+from tkinter import ttk, messagebox
+
+from flask import Flask, send_from_directory, jsonify, request
+from flask_sock import Sock
+import pyautogui
+
+APP_NAME = "LUAHUB Virtual VR"
+PORT = 8765
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Support both repo layouts: website/index.html and root index.html.
+WEB_DIR = os.path.join(BASE_DIR, "website")
+if not os.path.isfile(os.path.join(WEB_DIR, "index.html")):
+    WEB_DIR = BASE_DIR
+
+app = Flask(__name__, static_folder=None)
+sock = Sock(app)
+
+state_lock = threading.Lock()
+state = {
+    "connected": False,
+    "camera": "LUAKAMERA",
+    "tracking": False,
+    "head_x": 0.0,
+    "head_y": 0.0,
+    "hand": "none",
+    "last_seen": 0.0,
+    "keys": set(),
+}
+pressed_keys = set()
+last_mouse = (0.0, 0.0)
+mouse_enabled = False
+running = True
+
+KEY_MAP = {
+    "forward": "w",
+    "backward": "s",
+    "left": "a",
+    "right": "d",
+    "jump": "space",
+    "sprint": "shift",
+}
+
+def local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
+
+def release_all():
+    global pressed_keys
+    for key in list(pressed_keys):
+        try:
+            pyautogui.keyUp(key)
+        except Exception:
+            pass
+    pressed_keys.clear()
+
+def press_state(new_keys):
+    global pressed_keys
+    desired = {KEY_MAP[k] for k in new_keys if k in KEY_MAP}
+    for key in pressed_keys - desired:
+        try:
+            pyautogui.keyUp(key)
+        except Exception:
+            pass
+    for key in desired - pressed_keys:
+        try:
+            pyautogui.keyDown(key)
+        except Exception:
+            pass
+    pressed_keys = desired
+
+@app.get("/")
+def index():
+    return send_from_directory(WEB_DIR, "index.html")
+
+@app.get("/api/status")
+def api_status():
+    with state_lock:
+        return jsonify({
+            "app": APP_NAME,
+            "connected": state["connected"],
+            "camera": state["camera"],
+            "tracking": state["tracking"],
+            "last_seen": state["last_seen"],
+            "headTracking": mouse_enabled,
+        })
+
+@app.post("/api/settings")
+def api_settings():
+    global mouse_enabled
+    data = request.get_json(silent=True) or {}
+    mouse_enabled = bool(data.get("headTracking", False))
+    with state_lock:
+        state["tracking"] = mouse_enabled
+    return jsonify({"ok": True, "headTracking": mouse_enabled})
+
+@sock.route("/ws")
+def websocket(ws):
+    with state_lock:
+        state["connected"] = True
+        state["last_seen"] = time.time()
+    try:
+        while True:
+            raw = ws.receive(timeout=10)
+            if raw is None:
+                with state_lock:
+                    if time.time() - state["last_seen"] > 4:
+                        state["connected"] = False
+                continue
+            import json
+            try:
+                data = json.loads(raw)
+            except Exception:
+                continue
+            kind = data.get("type")
+            with state_lock:
+                state["last_seen"] = time.time()
+                state["connected"] = True
+            if kind == "keys":
+                press_state(data.get("keys", []))
+            elif kind == "stop":
+                release_all()
+            elif kind == "tracking":
+                with state_lock:
+                    state["head_x"] = max(-1.0, min(1.0, float(data.get("x", 0))))
+                    state["head_y"] = max(-1.0, min(1.0, float(data.get("y", 0))))
+                    state["hand"] = str(data.get("gesture", "none"))[:32]
+                if mouse_enabled:
+                    # Relative mouse movement is intentionally disabled by default.
+                    # Browser tracking landmarks alone do not provide calibrated, reliable
+                    # Roblox camera control on every game.
+                    pass
+    except Exception:
+        pass
+    finally:
+        release_all()
+        with state_lock:
+            state["connected"] = False
+
+def run_server():
+    # Use a local-only server. Access from the phone is via ADB reverse forwarding.
+    app.run(host="127.0.0.1", port=PORT, debug=False, use_reloader=False, threaded=True)
+
+def find_adb():
+    """Find ADB from PATH, common install locations, or beside the EXE."""
+    candidates = []
+    found = shutil.which("adb") or shutil.which("adb.exe")
+    if found:
+        candidates.append(found)
+
+    home = os.path.expanduser("~")
+    candidates.extend([
+        os.path.join(home, "Downloads", "platform-tools", "adb.exe"),
+        os.path.join(home, "platform-tools", "adb.exe"),
+        os.path.join(BASE_DIR, "platform-tools", "adb.exe"),
+    ])
+    if getattr(sys, "frozen", False):
+        exe_dir = os.path.dirname(sys.executable)
+        candidates.extend([
+            os.path.join(exe_dir, "platform-tools", "adb.exe"),
+            os.path.join(exe_dir, "adb.exe"),
+        ])
+
+    seen = set()
+    for candidate in candidates:
+        if candidate and candidate not in seen and os.path.isfile(candidate):
+            seen.add(candidate)
+            return candidate
+    return None
+
+
+def adb_setup():
+    adb = find_adb()
+    if not adb:
+        return False, (
+            "ADB belum ditemukan. Pastikan adb.exe ada di "
+            "Downloads\\platform-tools atau tambahkan folder itu ke PATH."
+        )
+
+    try:
+        # Check that the ADB server/device command is callable, then set USB reverse.
+        version = subprocess.run(
+            [adb, "version"], capture_output=True, text=True, timeout=8
+        )
+        if version.returncode != 0:
+            detail = (version.stderr or version.stdout or "ADB tidak dapat dijalankan").strip()
+            return False, f"ADB ditemukan tetapi gagal dijalankan:\n{detail}"
+
+        devices = subprocess.run(
+            [adb, "devices"], capture_output=True, text=True, timeout=8
+        )
+        device_lines = [
+            line.strip() for line in devices.stdout.splitlines()[1:]
+            if line.strip() and "\tdevice" in line
+        ]
+        if not device_lines:
+            return False, (
+                f"ADB ditemukan: {adb}\nTetapi HP belum terotorisasi/terdeteksi. "
+                "Buka kunci HP, izinkan USB debugging, lalu cabut-pasang kabel."
+            )
+
+        result = subprocess.run(
+            [adb, "reverse", f"tcp:{PORT}", f"tcp:{PORT}"],
+            capture_output=True, text=True, timeout=10
+        )
+        if result.returncode == 0:
+            return True, f"ADB port forwarding aktif.\nADB: {adb}\nHP: {device_lines[0]}"
+
+        detail = (result.stderr or result.stdout or "Tidak ada detail error").strip()
+        return False, f"ADB ditemukan, tetapi port forwarding gagal:\n{detail}"
     except Exception as exc:
         return False, f"Gagal menjalankan ADB ({adb}):\n{exc}"
 
@@ -111,4 +335,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
