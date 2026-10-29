@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#101116">
+<title>LUAHUB Remote</title>
+<style>
+:root{color-scheme:dark;--bg:#101116;--panel:#191b24;--panel2:#222532;--red:#ff354d;--muted:#aeb3c2;--line:#303342}
+*{box-sizing:border-box;touch-action:manipulation}
+body{margin:0;background:radial-gradient(ellipse at top right,#3b1420 0,transparent 45%),var(--bg);color:#f6f7fb;font-family:Inter,"Segoe UI",system-ui,sans-serif;min-height:100vh}
+.wrap{max-width:980px;margin:auto;padding:18px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.brand{font-weight:900;letter-spacing:.08em;font-size:1.35rem;color:var(--red)}.sub{color:var(--muted);font-size:.78rem;margin-top:4px}
+.pill{border:1px solid var(--line);border-radius:999px;padding:8px 11px;color:var(--muted);font-size:.75rem;white-space:nowrap}
+.pill:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#e5a63b;margin-right:7px}
+.pill.on:before{background:#44d69e}
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+.card{background:linear-gradient(145deg,#1b1e28,#151720);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 12px 35px #0003}
+h2{font-size:.92rem;margin:0 0 13px;letter-spacing:.04em} .muted{color:var(--muted);font-size:.8rem;line-height:1.5}
+.camera{width:100%;aspect-ratio:4/3;background:#08090d;border:1px solid var(--line);border-radius:14px;object-fit:cover;display:block}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+button,select{border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:#fff;padding:12px 14px;font:inherit;font-weight:700}
+button{cursor:pointer;user-select:none}button:active,button.active{background:var(--red);border-color:var(--red);transform:scale(.98)}
+.primary{background:var(--red);border-color:var(--red)}.small{font-size:.78rem;padding:10px 12px}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;max-width:330px;margin:8px auto 14px}
+.pad button{min-height:70px;font-size:1.3rem;background:#242735}
+.pad .empty{visibility:hidden}.pad .stop{font-size:.85rem;background:#3b2029}
+.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.actions button{min-height:48px}
+.statusline{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.8rem}.statusline:last-child{border:0}
+.warn{border-left:3px solid var(--red);padding:10px 12px;background:#2b1820;border-radius:8px;color:#ffdce1;font-size:.78rem;line-height:1.5;margin-top:12px}
+footer{text-align:center;color:#73798a;font-size:.72rem;padding:18px}
+@media(max-width:700px){.wrap{padding:12px}.grid{grid-template-columns:1fr}header{align-items:flex-start}.brand{font-size:1.2rem}.pad button{min-height:64px}.card{padding:14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div><div class="brand">LUAHUB <span style="color:#fff">REMOTE</span></div><div class="sub">VIRTUAL VR · USB PHONE CONTROLLER</div></div><div id="conn" class="pill">Menyambungkan…</div></header>
+<div class="grid">
+<section class="card">
+<h2>LUAKAMERA · CAMERA INPUT</h2>
+<video id="video" class="camera" autoplay playsinline muted></video>
+<div class="row"><button id="startCam" class="primary">▶ Aktifkan Kamera</button><button id="stopCam" class="small">Matikan</button></div>
+<p class="muted">Izinkan akses kamera saat diminta. Video diproses di browser HP; halaman ini mengirim data kontrol, bukan merekam atau menyimpan video.</p>
+<div class="warn">Jika kamera tidak bisa dibuka, gunakan alamat localhost melalui ADB reverse dan pastikan izin kamera browser diaktifkan.</div>
+</section>
+<section class="card">
+<h2>GERAKAN KARAKTER</h2>
+<div class="pad" id="pad">
+<button class="empty" tabindex="-1">·</button><button data-key="forward" aria-label="Maju">▲</button><button class="empty" tabindex="-1">·</button>
+<button data-key="left" aria-label="Kiri">◀</button><button class="stop" id="stop">STOP</button><button data-key="right" aria-label="Kanan">▶</button>
+<button class="empty" tabindex="-1">·</button><button data-key="backward" aria-label="Mundur">▼</button><button class="empty" tabindex="-1">·</button>
+</div>
+<div class="actions"><button data-key="jump">⤒ LOMPAT</button><button data-key="sprint">⚡ SPRINT</button></div>
+<div class="row"><button id="headToggle" class="small">Head tracking: OFF</button><button id="calibrate" class="small">Kalibrasi</button></div>
+<p class="muted">Tahan tombol arah untuk terus bergerak. Tekan STOP untuk melepas semua tombol.</p>
+<div style="margin-top:12px">
+<div class="statusline"><span>USB/WebSocket</span><strong id="wsstatus">Menghubungkan</strong></div>
+<div class="statusline"><span>Kamera</span><strong id="camstatus">Mati</strong></div>
+<div class="statusline"><span>Head tracking</span><strong id="trackstatus">OFF</strong></div>
+</div>
+</section>
+</div>
+<footer>Credit by AHZA · LUAHUB Virtual VR · Local control only</footer>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+let ws=null, cameraStream=null, held=new Set(), headTracking=false, neutral=null, lastSend=0;
+function connectWS(){
+  const proto=location.protocol==="https:"?"wss":"ws";
+  ws=new WebSocket(`${proto}://${location.host}/ws`);
+  ws.onopen=()=>{$("conn").textContent="PC TERHUBUNG";$("conn").classList.add("on");$("wsstatus").textContent="Terhubung"};
+  ws.onclose=()=>{$("conn").textContent="PC TERPUTUS";$("conn").classList.remove("on");$("wsstatus").textContent="Terputus";setTimeout(connectWS,1200)};
+  ws.onerror=()=>{try{ws.close()}catch(e){}};
+}
+function send(data){if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify(data))}
+function updateKeys(){send({type:"keys",keys:[...held]})}
+function stopAll(){held.clear();document.querySelectorAll("[data-key]").forEach(b=>b.classList.remove("active"));send({type:"stop"});updateKeys()}
+document.querySelectorAll("[data-key]").forEach(btn=>{
+ const key=btn.dataset.key;
+ const down=e=>{e.preventDefault();held.add(key);btn.classList.add("active");updateKeys()};
+ const up=e=>{e.preventDefault();held.delete(key);btn.classList.remove("active");updateKeys()};
+ btn.addEventListener("pointerdown",down);["pointerup","pointercancel","pointerleave"].forEach(ev=>btn.addEventListener(ev,up));
+});
+$("stop").addEventListener("click",stopAll);
+window.addEventListener("blur",stopAll);
+document.addEventListener("visibilitychange",()=>{if(document.hidden)stopAll()});
+$("startCam").addEventListener("click",async()=>{
+ try{
+  cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:480}},audio:false});
+  $("video").srcObject=cameraStream;$("camstatus").textContent="Aktif";
+ }catch(err){alert("Kamera gagal dibuka: "+err.message+"\nPastikan izin kamera diberikan dan halaman dibuka melalui localhost.");}
+});
+$("stopCam").addEventListener("click",()=>{if(cameraStream)cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;$("video").srcObject=null;$("camstatus").textContent="Mati"});
+$("headToggle").addEventListener("click",async()=>{
+ headTracking=!headTracking;$("headToggle").textContent="Head tracking: "+(headTracking?"ON":"OFF");$("trackstatus").textContent=headTracking?"ON (demo)":"OFF";
+ await fetch("/api/settings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({headTracking})});
+});
+$("calibrate").addEventListener("click",()=>{neutral=null;alert("Kalibrasi dasar direset. Deteksi landmark kepala belum diaktifkan pada build awal.")});
+connectWS();
+</script>
+</body>
+</html>
