@@ -1,9 +1,12 @@
+
 name: Build LUAHUB Virtual VR EXE
 
 on:
   workflow_dispatch:
   push:
-    branches: [ "main", "master" ]
+    branches:
+      - main
+      - master
 
 permissions:
   contents: read
@@ -11,11 +14,12 @@ permissions:
 jobs:
   build-windows:
     runs-on: windows-latest
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -23,27 +27,33 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pyinstaller
+          python -m pip install -r requirements.txt
+          python -m pip install pyinstaller
 
       - name: Build Windows EXE
-        run: |
-          pyinstaller --noconfirm --clean --onefile --windowed --name LUAHUB-Virtual-VR main.py
-
-      - name: Bundle website and ADB setup notes
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force -Path dist\website | Out-Null
-          Copy-Item website\index.html dist\website\index.html
-          Copy-Item README.md dist\README.txt
-          Compress-Archive -Path dist\LUAHUB-Virtual-VR.exe,dist\website,dist\README.txt -DestinationPath dist\LUAHUB-Virtual-VR-Windows.zip -Force
+          pyinstaller --noconfirm --clean --onefile --windowed `
+            --name LUAHUB-Virtual-VR `
+            --add-data "index.html;." `
+            main.py
 
-      - name: Upload EXE and website bundle
+      - name: Package EXE
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist\source | Out-Null
+          Copy-Item index.html dist\source\index.html
+          Copy-Item main.py dist\source\main.py
+          Copy-Item requirements.txt dist\source\requirements.txt
+          Compress-Archive -Path dist\source\* `
+            -DestinationPath dist\LUAHUB-Virtual-VR-Source.zip -Force
+
+      - name: Upload EXE and source
         uses: actions/upload-artifact@v4
         with:
           name: LUAHUB-Virtual-VR-Windows
           path: |
             dist/LUAHUB-Virtual-VR.exe
-            dist/LUAHUB-Virtual-VR-Windows.zip
+            dist/LUAHUB-Virtual-VR-Source.zip
           if-no-files-found: error
           retention-days: 14
