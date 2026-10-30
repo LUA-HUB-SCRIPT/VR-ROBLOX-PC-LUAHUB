@@ -5,270 +5,435 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#080b14">
+<meta name="description" content="LUAHUB Virtual VR - Phone-based controller for Roblox PC.">
 <title>LUAHUB Virtual VR</title>
 
 <style>
 :root {
-    --bg: #080b14;
-    --panel: #111827;
-    --panel2: #172033;
-    --red: #ff3155;
-    --blue: #3485ff;
-    --cyan: #36d9ff;
-    --text: #f4f7ff;
-    --muted: #8995aa;
-    --border: #27334a;
+    --bg:#080b14;
+    --panel:#111827;
+    --panel2:#172033;
+    --red:#ff3155;
+    --blue:#3485ff;
+    --cyan:#36d9ff;
+    --text:#f4f7ff;
+    --muted:#8995aa;
+    --border:#27334a;
 }
-* { box-sizing: border-box; }
+* {box-sizing:border-box}
+html {scroll-behavior:smooth}
 body {
-    margin: 0;
+    margin:0;
     background:
-      radial-gradient(ellipse at 10% 0%, #182448 0%, transparent 40%),
-      radial-gradient(ellipse at 100% 30%, #301323 0%, transparent 35%),
-      var(--bg);
-    color: var(--text);
-    font-family: Arial, sans-serif;
-    min-height: 100vh;
+    radial-gradient(ellipse at 10% 0%,#182448 0%,transparent 40%),
+    radial-gradient(ellipse at 100% 30%,#301323 0%,transparent 35%),
+    var(--bg);
+    color:var(--text);
+    font-family:Arial,sans-serif;
+    min-height:100vh;
 }
-button, input { font: inherit; }
+button,input {font:inherit}
+button,a { -webkit-tap-highlight-color:transparent }
 button {
-    border: 1px solid var(--border);
-    color: white;
-    background: var(--panel2);
-    border-radius: 12px;
-    padding: 12px 15px;
-    cursor: pointer;
-    transition: .15s;
+    border:1px solid var(--border);
+    color:white;
+    background:var(--panel2);
+    border-radius:12px;
+    padding:12px 15px;
+    cursor:pointer;
+    transition:.18s;
 }
-button:active { transform: scale(.96); }
-button.active {
-    border-color: var(--red);
-    background: #50172a;
-    box-shadow: 0 0 18px #ff315533;
-}
+button:hover {border-color:var(--blue)}
+button:active {transform:scale(.97)}
+a {color:inherit;text-decoration:none}
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 18px 5%;
-    border-bottom: 1px solid var(--border);
-    background: #080b14cc;
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    backdrop-filter: blur(15px);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:15px 5%;
+    border-bottom:1px solid var(--border);
+    background:#080b14eF;
+    position:sticky;
+    top:0;
+    z-index:10;
+    backdrop-filter:blur(16px);
 }
 .logo {
-    font-size: 22px;
-    font-weight: 900;
-    letter-spacing: 2px;
+    font-size:23px;
+    font-weight:900;
+    letter-spacing:2px;
 }
-.logo span { color: var(--red); }
-.status {
-    color: var(--muted);
-    font-size: 12px;
+.logo span {color:var(--red)}
+nav {display:flex;gap:7px;align-items:center}
+nav button {
+    background:transparent;
+    border-color:transparent;
+    color:var(--muted);
+    padding:10px 13px;
+    font-size:13px;
 }
-main {
-    width: min(1150px, 94%);
-    margin: 25px auto;
+nav button.active,nav button:hover {
+    color:white;
+    background:#1a263b;
+    border-color:var(--border);
+}
+.nav-download {
+    background:var(--red);
+    color:white;
+    border:0;
+    font-weight:bold;
+}
+main {width:min(1150px,94%);margin:30px auto}
+.page {display:none;animation:fade .25s ease}
+.page.active {display:block}
+@keyframes fade {
+    from {opacity:0;transform:translateY(7px)}
+    to {opacity:1;transform:translateY(0)}
 }
 .hero {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 22px;
+    min-height:410px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:flex-start;
+    padding:45px;
+    border:1px solid var(--border);
+    border-radius:24px;
+    background:
+      linear-gradient(110deg,#101b32ee,#111827bb),
+      radial-gradient(circle at 85% 30%,#ff315544,transparent 35%);
+    overflow:hidden;
+    position:relative;
 }
-h1 { font-size: clamp(25px, 5vw, 38px); margin: 0 0 7px; }
-.subtitle { color: var(--muted); font-size: 14px; }
-.pill {
-    background: #142c24;
-    border: 1px solid #246b4b;
-    color: #65f0ad;
-    padding: 8px 12px;
-    border-radius: 30px;
-    font-size: 12px;
-    white-space: nowrap;
+.hero:after {
+    content:"VR";
+    position:absolute;
+    right:5%;
+    top:10%;
+    font-size:clamp(100px,20vw,230px);
+    font-weight:1000;
+    color:#ffffff08;
+    pointer-events:none;
 }
-.grid {
-    display: grid;
-    grid-template-columns: 1.15fr .85fr;
-    gap: 18px;
+.eyebrow {
+    color:var(--cyan);
+    font-size:12px;
+    letter-spacing:3px;
+    font-weight:bold;
 }
+h1 {
+    font-size:clamp(35px,6vw,65px);
+    line-height:1.05;
+    margin:18px 0;
+}
+h1 span {color:var(--red)}
+.subtitle {
+    color:var(--muted);
+    line-height:1.7;
+    max-width:620px;
+    font-size:15px;
+}
+.row {display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.primary {
+    background:linear-gradient(110deg,#e91f49,#ff4b65);
+    border:0;
+    font-weight:bold;
+}
+.blue {
+    background:#15356b;
+    border-color:#285cb5;
+}
+.big-button {padding:14px 20px}
+.section-title {margin:35px 0 15px;font-size:22px}
+.cards {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+}
+.card {
+    background:linear-gradient(145deg,#151e30,#0e1421);
+    border:1px solid var(--border);
+    border-radius:17px;
+    padding:20px;
+}
+.card-icon {font-size:28px}
+.card h3 {margin:13px 0 8px;font-size:16px}
+.card p {color:var(--muted);font-size:13px;line-height:1.6}
 .panel {
-    background: linear-gradient(145deg, #151e30, #0e1421);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 18px;
-    box-shadow: 0 12px 35px #0004;
-    min-width: 0;
+    background:linear-gradient(145deg,#151e30,#0e1421);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:18px;
+    box-shadow:0 12px 35px #0004;
+    min-width:0;
 }
-.panel h2 {
-    font-size: 16px;
-    margin: 0 0 15px;
+.panel h2 {font-size:16px;margin:0 0 15px}
+.grid {
+    display:grid;
+    grid-template-columns:1.15fr .85fr;
+    gap:18px;
 }
 .camera {
-    position: relative;
-    background: #03060c;
-    border: 1px solid #26334b;
-    border-radius: 14px;
-    overflow: hidden;
-    aspect-ratio: 16/10;
+    position:relative;
+    background:#03060c;
+    border:1px solid #26334b;
+    border-radius:14px;
+    overflow:hidden;
+    aspect-ratio:16/10;
 }
 video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform: scaleX(-1);
-    display: block;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transform:scaleX(-1);
+    display:block;
 }
 .camera-label {
-    position: absolute;
-    left: 12px;
-    top: 12px;
-    background: #0009;
-    padding: 7px 10px;
-    border-radius: 8px;
-    font-size: 11px;
+    position:absolute;
+    left:12px;
+    top:12px;
+    background:#0009;
+    padding:7px 10px;
+    border-radius:8px;
+    font-size:11px;
 }
 .camera-placeholder {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    color: var(--muted);
-    text-align: center;
-    padding: 20px;
-    font-size: 13px;
-    pointer-events: none;
+    position:absolute;
+    inset:0;
+    display:grid;
+    place-items:center;
+    color:var(--muted);
+    text-align:center;
+    padding:20px;
+    font-size:13px;
+    pointer-events:none;
 }
-.row {
-    display: flex;
-    gap: 9px;
-    flex-wrap: wrap;
-    margin-top: 13px;
-}
-.primary {
-    background: linear-gradient(110deg, #e91f49, #ff4b65);
-    border: 0;
-    font-weight: bold;
-}
-.secondary-blue {
-    background: #15356b;
-    border-color: #285cb5;
-}
-.full { width: 100%; }
 .connection-list {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
 }
-.connection-list button { padding: 12px 5px; font-size: 12px; }
+.connection-list button {padding:12px 5px;font-size:12px}
+button.selected {
+    border-color:var(--red);
+    background:#50172a;
+}
 input {
-    width: 100%;
-    background: #080e1b;
-    color: white;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px;
-    outline: none;
-    margin-top: 10px;
-}
-input:focus { border-color: var(--blue); }
-.note {
-    color: var(--muted);
-    font-size: 11px;
-    line-height: 1.5;
-    margin-top: 10px;
+    width:100%;
+    background:#080e1b;
+    color:white;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px;
+    outline:none;
+    margin-top:10px;
 }
 .metrics {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 9px;
-    margin-top: 14px;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:9px;
+    margin-top:14px;
 }
 .metric {
-    background: #0a1120;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px;
+    background:#0a1120;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:12px;
 }
-.metric small { color: var(--muted); display: block; }
-.metric strong { display: block; margin-top: 7px; font-size: 14px; }
+.metric small {color:var(--muted);display:block}
+.metric strong {display:block;margin-top:7px;font-size:14px}
+.note {
+    color:var(--muted);
+    font-size:11px;
+    line-height:1.6;
+    margin-top:10px;
+}
 .controls {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    margin-top: 18px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    margin-top:18px;
 }
 .pad {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 7px;
-    max-width: 230px;
-    margin: auto;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:7px;
+    max-width:230px;
+    margin:auto;
 }
 .pad button {
-    min-height: 57px;
-    font-size: 19px;
-    font-weight: bold;
-    touch-action: none;
+    min-height:57px;
+    font-size:19px;
+    font-weight:bold;
+    touch-action:none;
 }
-.pad .empty { visibility: hidden; }
+.pad .empty {visibility:hidden}
 .action-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:8px;
 }
 .action-grid button {
-    min-height: 54px;
-    font-size: 12px;
-    touch-action: none;
+    min-height:54px;
+    font-size:12px;
+    touch-action:none;
 }
-.action-grid .wide { grid-column: span 2; }
-button:disabled { opacity: .4; cursor: not-allowed; }
+.action-grid .wide {grid-column:span 2}
+button:disabled {opacity:.4;cursor:not-allowed}
 #message {
-    margin-top: 14px;
-    padding: 11px;
-    background: #0a1120;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--muted);
-    font-size: 12px;
+    margin-top:14px;
+    padding:11px;
+    background:#0a1120;
+    border:1px solid var(--border);
+    border-radius:10px;
+    color:var(--muted);
+    font-size:12px;
 }
+.download-card {
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+.download-card .version {
+    color:var(--cyan);
+    font-size:11px;
+    letter-spacing:2px;
+}
+.download-card .download-button {
+    display:block;
+    text-align:center;
+    background:var(--red);
+    color:white;
+    padding:13px;
+    border-radius:11px;
+    font-weight:bold;
+}
+.download-card .download-button:hover {filter:brightness(1.15)}
+.download-card .disabled {
+    background:#293246;
+    color:#aab3c2;
+    cursor:not-allowed;
+}
+.creator {
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+.avatar {
+    width:85px;
+    height:85px;
+    display:grid;
+    place-items:center;
+    border-radius:22px;
+    background:linear-gradient(140deg,var(--red),#6028a8);
+    font-size:35px;
+    font-weight:900;
+}
+.creator h2 {margin:0 0 8px}
+.creator p {margin:0;color:var(--muted);font-size:13px;line-height:1.6}
 footer {
-    text-align: center;
-    padding: 25px;
-    color: var(--muted);
-    font-size: 11px;
+    border-top:1px solid var(--border);
+    margin-top:45px;
+    padding:25px 10px;
+    text-align:center;
+    color:var(--muted);
+    font-size:11px;
+    line-height:1.8;
 }
+footer strong {color:white}
 @media(max-width:760px) {
-    header { padding: 15px 4%; }
-    .grid, .controls { grid-template-columns: 1fr; }
-    .hero { align-items: flex-start; flex-direction: column; }
-    main { width: 94%; }
+    header {padding:12px 3%;flex-wrap:wrap;gap:10px}
+    nav {width:100%;justify-content:space-between;gap:2px}
+    nav button {padding:9px 7px;font-size:11px}
+    .grid,.controls {grid-template-columns:1fr}
+    .cards {grid-template-columns:1fr}
+    .hero {padding:27px;min-height:350px}
+    .creator {align-items:flex-start}
 }
 </style>
 </head>
 
 <body>
+
 <header>
-    <div class="logo">LUA<span>HUB</span> VR</div>
-    <div class="status" id="topStatus">● DISCONNECTED</div>
+    <div class="logo">LUA<span>HUB</span></div>
+    <nav>
+        <button class="active" data-page="home">HOME</button>
+        <button data-page="control">CONTROL</button>
+        <button data-page="download">DOWNLOAD</button>
+        <button data-page="about">ABOUT</button>
+    </nav>
 </header>
 
 <main>
-    <section class="hero">
-        <div>
-            <h1>Virtual VR Control</h1>
-            <div class="subtitle">Phone motion tracking · Roblox PC controller</div>
-        </div>
-        <div class="pill">● LOCAL MODE</div>
-    </section>
 
-    <div class="grid">
+<!-- HOME -->
+<section class="page active" id="home">
+    <div class="hero">
+        <div class="eyebrow">LUAHUB PROJECT • PC EDITION</div>
+        <h1>VIRTUAL <span>VR</span><br>FOR ROBLOX</h1>
+        <p class="subtitle">
+            Ubah smartphone menjadi controller untuk Roblox PC.
+            Gunakan kamera HP untuk mencoba head tracking dan hand tracking,
+            serta kontrol permainan melalui koneksi lokal.
+        </p>
+        <div class="row">
+            <button class="primary big-button" data-goto="control">
+                OPEN CONTROL →
+            </button>
+            <button class="big-button blue" data-goto="download">
+                DOWNLOAD APP
+            </button>
+        </div>
+    </div>
+
+    <h2 class="section-title">FEATURES</h2>
+    <div class="cards">
+        <div class="card">
+            <div class="card-icon">📷</div>
+            <h3>Camera Tracking</h3>
+            <p>Gunakan kamera HP untuk mendeteksi landmark wajah dan tangan.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">🎮</div>
+            <h3>Virtual Controller</h3>
+            <p>Kontrol WASD, Jump, Sprint, Crouch, dan Interact dari layar HP.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">🔗</div>
+            <h3>PC Connection</h3>
+            <p>Hubungkan HP ke PC melalui USB atau jaringan Wi-Fi lokal.</p>
+        </div>
+    </div>
+
+    <h2 class="section-title">HOW IT WORKS</h2>
+    <div class="cards">
+        <div class="card">
+            <div class="card-icon">01</div>
+            <h3>Install PC App</h3>
+            <p>Jalankan aplikasi LUAHUB Virtual VR di Windows.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">02</div>
+            <h3>Connect Phone</h3>
+            <p>Sambungkan HP menggunakan USB atau Wi-Fi.</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">03</div>
+            <h3>Start Controlling</h3>
+            <p>Buka Control, aktifkan kamera, dan gunakan controller.</p>
+        </div>
+    </div>
+</section>
+
+<!-- CONTROL -->
+<section class="page" id="control">
+    <h1 style="font-size:35px">VR <span style="color:var(--red)">CONTROL</span></h1>
+    <p class="subtitle">Kamera tracking dan kontrol Roblox PC.</p>
+
+    <div class="grid" style="margin-top:22px">
         <section class="panel">
-            <h2>📷 Camera Tracking</h2>
+            <h2>📷 CAMERA TRACKING</h2>
             <div class="camera">
                 <video id="camera" autoplay muted playsinline></video>
                 <div class="camera-label" id="cameraLabel">CAMERA OFF</div>
@@ -281,7 +446,6 @@ footer {
                 <button id="stopCamera">STOP</button>
                 <button id="flipCamera">FLIP</button>
             </div>
-
             <div class="metrics">
                 <div class="metric">
                     <small>Head Tracking</small>
@@ -292,18 +456,14 @@ footer {
                     <strong id="handStatus">Not detected</strong>
                 </div>
             </div>
-            <div class="note">
-                Tracking menggunakan kamera depan/belakang HP.
-                Hasilnya berupa koordinat landmark, bukan gerakan kepala VR native.
-            </div>
         </section>
 
         <section class="panel">
-            <h2>🔗 Connection</h2>
+            <h2>🔗 CONNECTION</h2>
             <div class="connection-list">
-                <button class="active" data-mode="usb">USB</button>
-                <button data-mode="wifi">Wi-Fi</button>
-                <button data-mode="bluetooth">Bluetooth</button>
+                <button class="selected" data-mode="usb">USB</button>
+                <button data-mode="wifi">WI-FI</button>
+                <button data-mode="bluetooth">BLUETOOTH</button>
             </div>
 
             <div id="wifiBox" style="display:none">
@@ -312,8 +472,7 @@ footer {
             </div>
 
             <div id="connectionNote" class="note">
-                USB menggunakan ADB reverse. Sambungkan HP ke PC dan jalankan
-                ADB reverse dari aplikasi Python.
+                USB menggunakan ADB reverse. Sambungkan HP ke PC.
             </div>
 
             <button class="primary full" id="connectBtn" style="margin-top:15px">
@@ -325,18 +484,22 @@ footer {
             <div class="metrics">
                 <div class="metric">
                     <small>Server</small>
-                    <strong id="serverStatus">Offline</strong>
+                    <strong id="serverStatus">Checking...</strong>
                 </div>
                 <div class="metric">
                     <small>Connection</small>
                     <strong id="connectionStatus">None</strong>
                 </div>
             </div>
+            <p class="note">
+                Bluetooth belum didukung. Untuk kamera, browser Android
+                mungkin memerlukan localhost atau HTTPS.
+            </p>
         </section>
     </div>
 
     <section class="panel" style="margin-top:18px">
-        <h2>🎮 VR Controller</h2>
+        <h2>🎮 VIRTUAL CONTROLLER</h2>
         <div class="controls">
             <div>
                 <div class="subtitle" style="text-align:center;margin-bottom:12px">
@@ -351,7 +514,6 @@ footer {
                     <button data-key="right">▶</button>
                 </div>
             </div>
-
             <div>
                 <div class="subtitle" style="text-align:center;margin-bottom:12px">
                     ACTIONS
@@ -365,16 +527,144 @@ footer {
                 </div>
             </div>
         </div>
-        <div class="note">
-            Tombol mengirim input keyboard ke PC. Pastikan jendela Roblox
-            sedang aktif/fokus agar input diterima.
-        </div>
+        <p class="note">
+            Pastikan jendela Roblox sedang aktif/fokus di PC.
+        </p>
     </section>
+</section>
+
+<!-- DOWNLOAD -->
+<section class="page" id="download">
+    <div class="hero" style="min-height:260px">
+        <div class="eyebrow">LUAHUB OFFICIAL DOWNLOAD</div>
+        <h1>DOWNLOAD <span>VR</span></h1>
+        <p class="subtitle">
+            Unduh aplikasi dan source code LUAHUB Virtual VR melalui
+            halaman repositori resmi.
+        </p>
+    </div>
+
+    <h2 class="section-title">AVAILABLE DOWNLOADS</h2>
+    <div class="cards">
+        <div class="card download-card">
+            <div class="card-icon">🖥️</div>
+            <div class="version">WINDOWS EDITION</div>
+            <h3>LUAHUB Virtual VR.exe</h3>
+            <p>Aplikasi PC untuk menjalankan server controller dan menghubungkan HP.</p>
+            <a class="download-button"
+               href="https://github.com/LUA-HUB-SCRIPT/VR-ROBLOX-PC-LUAHUB/releases/latest"
+               target="_blank" rel="noopener">
+                OPEN WINDOWS RELEASES
+            </a>
+        </div>
+
+        <div class="card download-card">
+            <div class="card-icon">📱</div>
+            <div class="version">ANDROID EDITION</div>
+            <h3>LUAHUB Virtual VR.apk</h3>
+            <p>Versi APK Android belum tersedia. Saat APK dirilis, file dapat ditambahkan di GitHub Releases.</p>
+            <span class="download-button disabled">COMING SOON</span>
+        </div>
+
+        <div class="card download-card">
+            <div class="card-icon">💻</div>
+            <div class="version">SOURCE CODE</div>
+            <h3>Developer Files</h3>
+            <p>Lihat source code, dokumentasi, dan pembaruan proyek.</p>
+            <a class="download-button"
+               href="https://github.com/LUA-HUB-SCRIPT/VR-ROBLOX-PC-LUAHUB"
+               target="_blank" rel="noopener">
+                VIEW SOURCE CODE
+            </a>
+        </div>
+    </div>
+
+    <div class="panel" style="margin-top:18px">
+        <h2>INSTALLATION GUIDE</h2>
+        <p class="subtitle">
+            1. Download versi Windows dari GitHub Releases.<br>
+            2. Ekstrak file jika dikemas dalam ZIP.<br>
+            3. Jalankan aplikasi PC.<br>
+            4. Hubungkan HP menggunakan USB atau Wi-Fi.<br>
+            5. Buka halaman Control.
+        </p>
+        <p class="note">
+            Unduh hanya file yang dirilis oleh pemilik repositori.
+            Windows mungkin menampilkan peringatan keamanan untuk aplikasi
+            yang belum memiliki tanda tangan digital.
+        </p>
+    </div>
+</section>
+
+<!-- ABOUT -->
+<section class="page" id="about">
+    <div class="hero" style="min-height:260px">
+        <div class="eyebrow">ABOUT THIS PROJECT</div>
+        <h1>ABOUT <span>LUAHUB</span></h1>
+        <p class="subtitle">
+            Project eksperimental untuk mengembangkan kontrol permainan
+            PC menggunakan smartphone.
+        </p>
+    </div>
+
+    <h2 class="section-title">DEVELOPER</h2>
+    <div class="panel">
+        <div class="creator">
+            <div class="avatar">L</div>
+            <div>
+                <h2>AHZA</h2>
+                <p>
+                    Creator & Developer<br>
+                    LUAHUB Virtual VR
+                </p>
+            </div>
+        </div>
+        <div class="row">
+            <a class="download-button"
+               href="https://github.com/LUA-HUB-SCRIPT"
+               target="_blank" rel="noopener">
+                GITHUB PROFILE
+            </a>
+        </div>
+    </div>
+
+    <h2 class="section-title">PROJECT INFORMATION</h2>
+    <div class="cards">
+        <div class="card">
+            <div class="card-icon">🏷️</div>
+            <h3>Project Name</h3>
+            <p>LUAHUB Virtual VR</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">🎮</div>
+            <h3>Platform</h3>
+            <p>Windows PC + Android browser controller</p>
+        </div>
+        <div class="card">
+            <div class="card-icon">⚙️</div>
+            <h3>Technology</h3>
+            <p>Python, Flask, WebSocket, MediaPipe, HTML, CSS, JavaScript</p>
+        </div>
+    </div>
+
+    <div class="panel" style="margin-top:18px">
+        <h2>IMPORTANT NOTICE</h2>
+        <p class="subtitle">
+            LUAHUB Virtual VR adalah controller eksperimental.
+            Sistem ini bukan headset VR native, tidak menyediakan tampilan
+            stereoskopik, dan belum menggunakan OpenXR.
+            Head tracking saat ini mengirim data koordinat ke server,
+            bukan menggerakkan kamera Roblox secara otomatis.
+        </p>
+    </div>
+</section>
+
 </main>
 
 <footer>
-    LUAHUB Virtual VR · Credit by AHZA<br>
-    Experimental phone-based tracking controller
+    <strong>LUAHUB Virtual VR</strong><br>
+    Created by AHZA · LUAHUB Project<br>
+    Experimental controller for Roblox PC
 </footer>
 
 <script type="module">
@@ -384,6 +674,26 @@ import {
     FaceLandmarker
 } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 
+const pages = document.querySelectorAll(".page");
+const navButtons = document.querySelectorAll("nav [data-page]");
+
+function showPage(name) {
+    pages.forEach(page => page.classList.toggle("active", page.id === name));
+    navButtons.forEach(button =>
+        button.classList.toggle("active", button.dataset.page === name)
+    );
+    window.scrollTo({top:0,behavior:"smooth"});
+}
+
+navButtons.forEach(button => {
+    button.addEventListener("click", () => showPage(button.dataset.page));
+});
+
+document.querySelectorAll("[data-goto]").forEach(button => {
+    button.addEventListener("click", () => showPage(button.dataset.goto));
+});
+
+// CAMERA AND TRACKING
 const video = document.getElementById("camera");
 const placeholder = document.getElementById("placeholder");
 const message = document.getElementById("message");
@@ -406,16 +716,10 @@ function say(text) {
 
 function setConnectionStatus(text) {
     document.getElementById("connectionStatus").textContent = text;
-    document.getElementById("topStatus").textContent =
-        ws && ws.readyState === WebSocket.OPEN
-        ? "● CONNECTED"
-        : "● DISCONNECTED";
 }
 
 function socketAddress() {
-    if (currentMode === "usb") {
-        return "ws://127.0.0.1:8765/ws";
-    }
+    if (currentMode === "usb") return "ws://127.0.0.1:8765/ws";
 
     if (currentMode === "wifi") {
         const ip = document.getElementById("pcIp").value.trim();
@@ -423,7 +727,7 @@ function socketAddress() {
         return `ws://${ip}:8765/ws`;
     }
 
-    throw new Error("Bluetooth belum didukung pada versi ini.");
+    throw new Error("Bluetooth belum didukung.");
 }
 
 function send(data) {
@@ -435,20 +739,20 @@ function send(data) {
 function keyDown(action) {
     if (held.has(action)) return;
     held.add(action);
-    send({type: "key", action, down: true});
+    send({type:"key",action,down:true});
 }
 
 function keyUp(action) {
     if (!held.has(action)) return;
     held.delete(action);
-    send({type: "key", action, down: false});
+    send({type:"key",action,down:false});
 }
 
 function releaseAll() {
-    send({type: "release_all"});
+    send({type:"release_all"});
     held.clear();
-    document.querySelectorAll("[data-key]").forEach(b =>
-        b.classList.remove("active")
+    document.querySelectorAll("[data-key]").forEach(button =>
+        button.classList.remove("selected")
     );
 }
 
@@ -463,7 +767,6 @@ function connect() {
 
         const address = socketAddress();
         say("Menghubungkan ke " + address);
-
         ws = new WebSocket(address);
 
         ws.onopen = () => {
@@ -481,8 +784,8 @@ function connect() {
             say("Gagal terhubung. Periksa server Python dan alamat PC.");
             setConnectionStatus("Error");
         };
-    } catch (err) {
-        say(err.message);
+    } catch (error) {
+        say(error.message);
     }
 }
 
@@ -490,41 +793,40 @@ document.getElementById("connectBtn").addEventListener("click", connect);
 
 document.querySelectorAll("[data-mode]").forEach(button => {
     button.addEventListener("click", () => {
-        document.querySelectorAll("[data-mode]").forEach(b =>
-            b.classList.remove("active")
+        document.querySelectorAll("[data-mode]").forEach(item =>
+            item.classList.remove("selected")
         );
-        button.classList.add("active");
+        button.classList.add("selected");
 
         currentMode = button.dataset.mode;
         document.getElementById("wifiBox").style.display =
             currentMode === "wifi" ? "block" : "none";
 
         const notes = {
-            usb: "USB menggunakan ADB reverse. Sambungkan HP ke PC dan aktifkan ADB reverse.",
-            wifi: "HP dan PC harus berada di jaringan yang sama. Kamera mungkin memerlukan HTTPS atau localhost.",
-            bluetooth: "Bluetooth belum diimplementasikan. Pilih USB atau Wi-Fi."
+            usb:"USB menggunakan ADB reverse. Sambungkan HP ke PC dan aktifkan ADB reverse.",
+            wifi:"HP dan PC harus berada di jaringan yang sama. Kamera mungkin memerlukan HTTPS.",
+            bluetooth:"Bluetooth belum diimplementasikan. Pilih USB atau Wi-Fi."
         };
 
-        document.getElementById("connectionNote").textContent =
-            notes[currentMode];
+        document.getElementById("connectionNote").textContent = notes[currentMode];
 
         if (ws) ws.close();
     });
 });
 
-// Tombol kontrol mendukung mouse dan layar sentuh.
+// Touch and mouse controls
 document.querySelectorAll("[data-key]").forEach(button => {
     const action = button.dataset.key;
 
     const down = event => {
         event.preventDefault();
-        button.classList.add("active");
+        button.classList.add("selected");
         keyDown(action);
     };
 
     const up = event => {
         event.preventDefault();
-        button.classList.remove("active");
+        button.classList.remove("selected");
         keyUp(action);
     };
 
@@ -546,8 +848,8 @@ async function loadTrackers() {
             modelAssetPath:
             "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
         },
-        runningMode: "VIDEO",
-        numFaces: 1
+        runningMode:"VIDEO",
+        numFaces:1
     });
 
     handLandmarker = await HandLandmarker.createFromOptions(vision, {
@@ -555,15 +857,15 @@ async function loadTrackers() {
             modelAssetPath:
             "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task"
         },
-        runningMode: "VIDEO",
-        numHands: 2
+        runningMode:"VIDEO",
+        numHands:2
     });
 }
 
 async function startCamera() {
     try {
         if (!navigator.mediaDevices?.getUserMedia) {
-            throw new Error("Browser tidak mendukung akses kamera di alamat ini. Gunakan localhost atau HTTPS.");
+            throw new Error("Browser tidak mendukung kamera pada alamat ini. Coba localhost atau HTTPS.");
         }
 
         if (!faceLandmarker || !handLandmarker) {
@@ -572,11 +874,11 @@ async function startCamera() {
         }
 
         stream = await navigator.mediaDevices.getUserMedia({
-            audio: false,
-            video: {
-                facingMode: cameraFacing,
-                width: {ideal: 640},
-                height: {ideal: 480}
+            audio:false,
+            video:{
+                facingMode:cameraFacing,
+                width:{ideal:640},
+                height:{ideal:480}
             }
         });
 
@@ -586,10 +888,11 @@ async function startCamera() {
         placeholder.style.display = "none";
         document.getElementById("cameraLabel").textContent = "CAMERA ACTIVE";
         say("Kamera aktif. Tracking berjalan.");
+
         trackingLoop = true;
         requestAnimationFrame(trackFrame);
-    } catch (err) {
-        say("Kamera gagal: " + err.message);
+    } catch (error) {
+        say("Kamera gagal: " + error.message);
     }
 }
 
@@ -634,13 +937,10 @@ function trackFrame() {
 
         if (face.faceLandmarks?.length) {
             const nose = face.faceLandmarks[0][1];
-            head = {x: nose.x, y: nose.y, z: nose.z};
-
-            document.getElementById("headStatus").textContent =
-                "Detected ✓";
+            head = {x:nose.x,y:nose.y,z:nose.z};
+            document.getElementById("headStatus").textContent = "Detected ✓";
         } else {
-            document.getElementById("headStatus").textContent =
-                "Not detected";
+            document.getElementById("headStatus").textContent = "Not detected";
         }
 
         let handDetected = false;
@@ -650,39 +950,37 @@ function trackFrame() {
             document.getElementById("handStatus").textContent =
                 hands.landmarks.length + " hand(s) detected";
 
-            // Deteksi kepalan sederhana dari jarak ujung jari ke pergelangan.
             const hand = hands.landmarks[0];
             const wrist = hand[0];
-            const tips = [8, 12, 16, 20];
+            const tips = [8,12,16,20];
 
             const distances = tips.map(index => {
                 const dx = hand[index].x - wrist.x;
                 const dy = hand[index].y - wrist.y;
-                return Math.sqrt(dx * dx + dy * dy);
+                return Math.sqrt(dx*dx + dy*dy);
             });
 
             const fist = distances.every(distance => distance < 0.25);
 
             if (fist && now - lastJumpTime > 1200) {
                 keyDown("jump");
-                setTimeout(() => keyUp("jump"), 180);
+                setTimeout(() => keyUp("jump"),180);
                 lastJumpTime = now;
             }
         } else {
-            document.getElementById("handStatus").textContent =
-                "Not detected";
+            document.getElementById("handStatus").textContent = "Not detected";
         }
 
         if (now - lastTrackingSend > 80) {
             send({
-                type: "tracking",
+                type:"tracking",
                 head,
-                hand_detected: handDetected
+                hand_detected:handDetected
             });
             lastTrackingSend = now;
         }
-    } catch (err) {
-        console.warn("Tracking:", err);
+    } catch (error) {
+        console.warn("Tracking error:",error);
     }
 
     requestAnimationFrame(trackFrame);
@@ -691,11 +989,8 @@ function trackFrame() {
 async function checkServer() {
     try {
         const response = await fetch("/api/status");
-        if (response.ok) {
-            document.getElementById("serverStatus").textContent = "Online";
-        } else {
-            document.getElementById("serverStatus").textContent = "Offline";
-        }
+        document.getElementById("serverStatus").textContent =
+            response.ok ? "Online" : "Offline";
     } catch {
         document.getElementById("serverStatus").textContent = "Unknown";
     }
