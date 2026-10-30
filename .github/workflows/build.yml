@@ -7,9 +7,11 @@ on:
     branches:
       - main
       - master
+    tags:
+      - "v*"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-windows:
@@ -31,38 +33,33 @@ jobs:
           if (Test-Path requirements.txt) {
             python -m pip install -r requirements.txt
           } else {
-            python -m pip install Flask flask-sock pyautogui
+            python -m pip install Flask flask-sock simple-websocket pyautogui
           }
           python -m pip install pyinstaller
+
+      - name: Check Python
+        run: python -m py_compile main.py
 
       - name: Build Windows EXE
         shell: pwsh
         run: |
           pyinstaller --noconfirm --clean --onefile --windowed `
             --name LUAHUB-Virtual-VR `
-            --add-data "index.html;." `
+            --add-data "website;website" `
             main.py
 
-      - name: Package source
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path dist\source | Out-Null
-          Copy-Item main.py dist\source\main.py
-          if (Test-Path index.html) {
-            Copy-Item index.html dist\source\index.html
-          }
-          if (Test-Path requirements.txt) {
-            Copy-Item requirements.txt dist\source\requirements.txt
-          }
-          Compress-Archive -Path dist\source\* `
-            -DestinationPath dist\LUAHUB-Virtual-VR-Source.zip -Force
-
-      - name: Upload EXE and source
+      - name: Upload EXE Artifact
         uses: actions/upload-artifact@v4
         with:
           name: LUAHUB-Virtual-VR-Windows
-          path: |
-            dist/LUAHUB-Virtual-VR.exe
-            dist/LUAHUB-Virtual-VR-Source.zip
+          path: dist/LUAHUB-Virtual-VR.exe
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish EXE to GitHub Releases
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: LUAHUB Virtual VR ${{ github.ref_name }}
+          files: dist/LUAHUB-Virtual-VR.exe
+          generate_release_notes: true
