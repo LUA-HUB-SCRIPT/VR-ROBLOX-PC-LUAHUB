@@ -1,104 +1,707 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#101116">
-<title>LUAHUB Remote</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080b14">
+<title>LUAHUB Virtual VR</title>
+
 <style>
-:root{color-scheme:dark;--bg:#101116;--panel:#191b24;--panel2:#222532;--red:#ff354d;--muted:#aeb3c2;--line:#303342}
-*{box-sizing:border-box;touch-action:manipulation}
-body{margin:0;background:radial-gradient(ellipse at top right,#3b1420 0,transparent 45%),var(--bg);color:#f6f7fb;font-family:Inter,"Segoe UI",system-ui,sans-serif;min-height:100vh}
-.wrap{max-width:980px;margin:auto;padding:18px}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
-.brand{font-weight:900;letter-spacing:.08em;font-size:1.35rem;color:var(--red)}.sub{color:var(--muted);font-size:.78rem;margin-top:4px}
-.pill{border:1px solid var(--line);border-radius:999px;padding:8px 11px;color:var(--muted);font-size:.75rem;white-space:nowrap}
-.pill:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#e5a63b;margin-right:7px}
-.pill.on:before{background:#44d69e}
-.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
-.card{background:linear-gradient(145deg,#1b1e28,#151720);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 12px 35px #0003}
-h2{font-size:.92rem;margin:0 0 13px;letter-spacing:.04em} .muted{color:var(--muted);font-size:.8rem;line-height:1.5}
-.camera{width:100%;aspect-ratio:4/3;background:#08090d;border:1px solid var(--line);border-radius:14px;object-fit:cover;display:block}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
-button,select{border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:#fff;padding:12px 14px;font:inherit;font-weight:700}
-button{cursor:pointer;user-select:none}button:active,button.active{background:var(--red);border-color:var(--red);transform:scale(.98)}
-.primary{background:var(--red);border-color:var(--red)}.small{font-size:.78rem;padding:10px 12px}
-.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;max-width:330px;margin:8px auto 14px}
-.pad button{min-height:70px;font-size:1.3rem;background:#242735}
-.pad .empty{visibility:hidden}.pad .stop{font-size:.85rem;background:#3b2029}
-.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
-.actions button{min-height:48px}
-.statusline{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);font-size:.8rem}.statusline:last-child{border:0}
-.warn{border-left:3px solid var(--red);padding:10px 12px;background:#2b1820;border-radius:8px;color:#ffdce1;font-size:.78rem;line-height:1.5;margin-top:12px}
-footer{text-align:center;color:#73798a;font-size:.72rem;padding:18px}
-@media(max-width:700px){.wrap{padding:12px}.grid{grid-template-columns:1fr}header{align-items:flex-start}.brand{font-size:1.2rem}.pad button{min-height:64px}.card{padding:14px}}
+:root {
+    --bg: #080b14;
+    --panel: #111827;
+    --panel2: #172033;
+    --red: #ff3155;
+    --blue: #3485ff;
+    --cyan: #36d9ff;
+    --text: #f4f7ff;
+    --muted: #8995aa;
+    --border: #27334a;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    background:
+      radial-gradient(ellipse at 10% 0%, #182448 0%, transparent 40%),
+      radial-gradient(ellipse at 100% 30%, #301323 0%, transparent 35%),
+      var(--bg);
+    color: var(--text);
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+}
+button, input { font: inherit; }
+button {
+    border: 1px solid var(--border);
+    color: white;
+    background: var(--panel2);
+    border-radius: 12px;
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: .15s;
+}
+button:active { transform: scale(.96); }
+button.active {
+    border-color: var(--red);
+    background: #50172a;
+    box-shadow: 0 0 18px #ff315533;
+}
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 5%;
+    border-bottom: 1px solid var(--border);
+    background: #080b14cc;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    backdrop-filter: blur(15px);
+}
+.logo {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+.logo span { color: var(--red); }
+.status {
+    color: var(--muted);
+    font-size: 12px;
+}
+main {
+    width: min(1150px, 94%);
+    margin: 25px auto;
+}
+.hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+h1 { font-size: clamp(25px, 5vw, 38px); margin: 0 0 7px; }
+.subtitle { color: var(--muted); font-size: 14px; }
+.pill {
+    background: #142c24;
+    border: 1px solid #246b4b;
+    color: #65f0ad;
+    padding: 8px 12px;
+    border-radius: 30px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+.grid {
+    display: grid;
+    grid-template-columns: 1.15fr .85fr;
+    gap: 18px;
+}
+.panel {
+    background: linear-gradient(145deg, #151e30, #0e1421);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 12px 35px #0004;
+    min-width: 0;
+}
+.panel h2 {
+    font-size: 16px;
+    margin: 0 0 15px;
+}
+.camera {
+    position: relative;
+    background: #03060c;
+    border: 1px solid #26334b;
+    border-radius: 14px;
+    overflow: hidden;
+    aspect-ratio: 16/10;
+}
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    display: block;
+}
+.camera-label {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    background: #0009;
+    padding: 7px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+}
+.camera-placeholder {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+    text-align: center;
+    padding: 20px;
+    font-size: 13px;
+    pointer-events: none;
+}
+.row {
+    display: flex;
+    gap: 9px;
+    flex-wrap: wrap;
+    margin-top: 13px;
+}
+.primary {
+    background: linear-gradient(110deg, #e91f49, #ff4b65);
+    border: 0;
+    font-weight: bold;
+}
+.secondary-blue {
+    background: #15356b;
+    border-color: #285cb5;
+}
+.full { width: 100%; }
+.connection-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+.connection-list button { padding: 12px 5px; font-size: 12px; }
+input {
+    width: 100%;
+    background: #080e1b;
+    color: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    outline: none;
+    margin-top: 10px;
+}
+input:focus { border-color: var(--blue); }
+.note {
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.5;
+    margin-top: 10px;
+}
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 9px;
+    margin-top: 14px;
+}
+.metric {
+    background: #0a1120;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+}
+.metric small { color: var(--muted); display: block; }
+.metric strong { display: block; margin-top: 7px; font-size: 14px; }
+.controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 18px;
+}
+.pad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+    max-width: 230px;
+    margin: auto;
+}
+.pad button {
+    min-height: 57px;
+    font-size: 19px;
+    font-weight: bold;
+    touch-action: none;
+}
+.pad .empty { visibility: hidden; }
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+.action-grid button {
+    min-height: 54px;
+    font-size: 12px;
+    touch-action: none;
+}
+.action-grid .wide { grid-column: span 2; }
+button:disabled { opacity: .4; cursor: not-allowed; }
+#message {
+    margin-top: 14px;
+    padding: 11px;
+    background: #0a1120;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-size: 12px;
+}
+footer {
+    text-align: center;
+    padding: 25px;
+    color: var(--muted);
+    font-size: 11px;
+}
+@media(max-width:760px) {
+    header { padding: 15px 4%; }
+    .grid, .controls { grid-template-columns: 1fr; }
+    .hero { align-items: flex-start; flex-direction: column; }
+    main { width: 94%; }
+}
 </style>
 </head>
+
 <body>
-<div class="wrap">
-<header><div><div class="brand">LUAHUB <span style="color:#fff">REMOTE</span></div><div class="sub">VIRTUAL VR · USB PHONE CONTROLLER</div></div><div id="conn" class="pill">Menyambungkan…</div></header>
-<div class="grid">
-<section class="card">
-<h2>LUAKAMERA · CAMERA INPUT</h2>
-<video id="video" class="camera" autoplay playsinline muted></video>
-<div class="row"><button id="startCam" class="primary">▶ Aktifkan Kamera</button><button id="stopCam" class="small">Matikan</button></div>
-<p class="muted">Izinkan akses kamera saat diminta. Video diproses di browser HP; halaman ini mengirim data kontrol, bukan merekam atau menyimpan video.</p>
-<div class="warn">Jika kamera tidak bisa dibuka, gunakan alamat localhost melalui ADB reverse dan pastikan izin kamera browser diaktifkan.</div>
-</section>
-<section class="card">
-<h2>GERAKAN KARAKTER</h2>
-<div class="pad" id="pad">
-<button class="empty" tabindex="-1">·</button><button data-key="forward" aria-label="Maju">▲</button><button class="empty" tabindex="-1">·</button>
-<button data-key="left" aria-label="Kiri">◀</button><button class="stop" id="stop">STOP</button><button data-key="right" aria-label="Kanan">▶</button>
-<button class="empty" tabindex="-1">·</button><button data-key="backward" aria-label="Mundur">▼</button><button class="empty" tabindex="-1">·</button>
-</div>
-<div class="actions"><button data-key="jump">⤒ LOMPAT</button><button data-key="sprint">⚡ SPRINT</button></div>
-<div class="row"><button id="headToggle" class="small">Head tracking: OFF</button><button id="calibrate" class="small">Kalibrasi</button></div>
-<p class="muted">Tahan tombol arah untuk terus bergerak. Tekan STOP untuk melepas semua tombol.</p>
-<div style="margin-top:12px">
-<div class="statusline"><span>USB/WebSocket</span><strong id="wsstatus">Menghubungkan</strong></div>
-<div class="statusline"><span>Kamera</span><strong id="camstatus">Mati</strong></div>
-<div class="statusline"><span>Head tracking</span><strong id="trackstatus">OFF</strong></div>
-</div>
-</section>
-</div>
-<footer>Credit by AHZA · LUAHUB Virtual VR · Local control only</footer>
-</div>
-<script>
-const $=id=>document.getElementById(id);
-let ws=null, cameraStream=null, held=new Set(), headTracking=false, neutral=null, lastSend=0;
-function connectWS(){
-  const proto=location.protocol==="https:"?"wss":"ws";
-  ws=new WebSocket(`${proto}://${location.host}/ws`);
-  ws.onopen=()=>{$("conn").textContent="PC TERHUBUNG";$("conn").classList.add("on");$("wsstatus").textContent="Terhubung"};
-  ws.onclose=()=>{$("conn").textContent="PC TERPUTUS";$("conn").classList.remove("on");$("wsstatus").textContent="Terputus";setTimeout(connectWS,1200)};
-  ws.onerror=()=>{try{ws.close()}catch(e){}};
+<header>
+    <div class="logo">LUA<span>HUB</span> VR</div>
+    <div class="status" id="topStatus">● DISCONNECTED</div>
+</header>
+
+<main>
+    <section class="hero">
+        <div>
+            <h1>Virtual VR Control</h1>
+            <div class="subtitle">Phone motion tracking · Roblox PC controller</div>
+        </div>
+        <div class="pill">● LOCAL MODE</div>
+    </section>
+
+    <div class="grid">
+        <section class="panel">
+            <h2>📷 Camera Tracking</h2>
+            <div class="camera">
+                <video id="camera" autoplay muted playsinline></video>
+                <div class="camera-label" id="cameraLabel">CAMERA OFF</div>
+                <div class="camera-placeholder" id="placeholder">
+                    Kamera belum aktif<br>Tekan START CAMERA
+                </div>
+            </div>
+            <div class="row">
+                <button class="primary" id="startCamera">START CAMERA</button>
+                <button id="stopCamera">STOP</button>
+                <button id="flipCamera">FLIP</button>
+            </div>
+
+            <div class="metrics">
+                <div class="metric">
+                    <small>Head Tracking</small>
+                    <strong id="headStatus">Not detected</strong>
+                </div>
+                <div class="metric">
+                    <small>Hand Tracking</small>
+                    <strong id="handStatus">Not detected</strong>
+                </div>
+            </div>
+            <div class="note">
+                Tracking menggunakan kamera depan/belakang HP.
+                Hasilnya berupa koordinat landmark, bukan gerakan kepala VR native.
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>🔗 Connection</h2>
+            <div class="connection-list">
+                <button class="active" data-mode="usb">USB</button>
+                <button data-mode="wifi">Wi-Fi</button>
+                <button data-mode="bluetooth">Bluetooth</button>
+            </div>
+
+            <div id="wifiBox" style="display:none">
+                <label class="note">IP komputer Windows</label>
+                <input id="pcIp" placeholder="Contoh: 192.168.1.10">
+            </div>
+
+            <div id="connectionNote" class="note">
+                USB menggunakan ADB reverse. Sambungkan HP ke PC dan jalankan
+                ADB reverse dari aplikasi Python.
+            </div>
+
+            <button class="primary full" id="connectBtn" style="margin-top:15px">
+                CONNECT TO PC
+            </button>
+
+            <div id="message">Menunggu koneksi...</div>
+
+            <div class="metrics">
+                <div class="metric">
+                    <small>Server</small>
+                    <strong id="serverStatus">Offline</strong>
+                </div>
+                <div class="metric">
+                    <small>Connection</small>
+                    <strong id="connectionStatus">None</strong>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <section class="panel" style="margin-top:18px">
+        <h2>🎮 VR Controller</h2>
+        <div class="controls">
+            <div>
+                <div class="subtitle" style="text-align:center;margin-bottom:12px">
+                    MOVEMENT
+                </div>
+                <div class="pad">
+                    <div class="empty"></div>
+                    <button data-key="forward">▲</button>
+                    <div class="empty"></div>
+                    <button data-key="left">◀</button>
+                    <button data-key="back">▼</button>
+                    <button data-key="right">▶</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="subtitle" style="text-align:center;margin-bottom:12px">
+                    ACTIONS
+                </div>
+                <div class="action-grid">
+                    <button data-key="jump">⬆ JUMP</button>
+                    <button data-key="sprint">⚡ SPRINT</button>
+                    <button data-key="crouch">⬇ CROUCH</button>
+                    <button data-key="interact">✦ INTERACT</button>
+                    <button class="wide" id="releaseAll">RELEASE ALL KEYS</button>
+                </div>
+            </div>
+        </div>
+        <div class="note">
+            Tombol mengirim input keyboard ke PC. Pastikan jendela Roblox
+            sedang aktif/fokus agar input diterima.
+        </div>
+    </section>
+</main>
+
+<footer>
+    LUAHUB Virtual VR · Credit by AHZA<br>
+    Experimental phone-based tracking controller
+</footer>
+
+<script type="module">
+import {
+    FilesetResolver,
+    HandLandmarker,
+    FaceLandmarker
+} from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+
+const video = document.getElementById("camera");
+const placeholder = document.getElementById("placeholder");
+const message = document.getElementById("message");
+
+let stream = null;
+let ws = null;
+let faceLandmarker = null;
+let handLandmarker = null;
+let cameraFacing = "user";
+let currentMode = "usb";
+let trackingLoop = false;
+let lastJumpTime = 0;
+let lastTrackingSend = 0;
+
+const held = new Set();
+
+function say(text) {
+    message.textContent = text;
 }
-function send(data){if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify(data))}
-function updateKeys(){send({type:"keys",keys:[...held]})}
-function stopAll(){held.clear();document.querySelectorAll("[data-key]").forEach(b=>b.classList.remove("active"));send({type:"stop"});updateKeys()}
-document.querySelectorAll("[data-key]").forEach(btn=>{
- const key=btn.dataset.key;
- const down=e=>{e.preventDefault();held.add(key);btn.classList.add("active");updateKeys()};
- const up=e=>{e.preventDefault();held.delete(key);btn.classList.remove("active");updateKeys()};
- btn.addEventListener("pointerdown",down);["pointerup","pointercancel","pointerleave"].forEach(ev=>btn.addEventListener(ev,up));
+
+function setConnectionStatus(text) {
+    document.getElementById("connectionStatus").textContent = text;
+    document.getElementById("topStatus").textContent =
+        ws && ws.readyState === WebSocket.OPEN
+        ? "● CONNECTED"
+        : "● DISCONNECTED";
+}
+
+function socketAddress() {
+    if (currentMode === "usb") {
+        return "ws://127.0.0.1:8765/ws";
+    }
+
+    if (currentMode === "wifi") {
+        const ip = document.getElementById("pcIp").value.trim();
+        if (!ip) throw new Error("Masukkan IP komputer terlebih dahulu.");
+        return `ws://${ip}:8765/ws`;
+    }
+
+    throw new Error("Bluetooth belum didukung pada versi ini.");
+}
+
+function send(data) {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(data));
+    }
+}
+
+function keyDown(action) {
+    if (held.has(action)) return;
+    held.add(action);
+    send({type: "key", action, down: true});
+}
+
+function keyUp(action) {
+    if (!held.has(action)) return;
+    held.delete(action);
+    send({type: "key", action, down: false});
+}
+
+function releaseAll() {
+    send({type: "release_all"});
+    held.clear();
+    document.querySelectorAll("[data-key]").forEach(b =>
+        b.classList.remove("active")
+    );
+}
+
+function connect() {
+    try {
+        if (currentMode === "bluetooth") {
+            say("Bluetooth belum tersedia. Gunakan USB atau Wi-Fi.");
+            return;
+        }
+
+        if (ws) ws.close();
+
+        const address = socketAddress();
+        say("Menghubungkan ke " + address);
+
+        ws = new WebSocket(address);
+
+        ws.onopen = () => {
+            say("Berhasil terhubung ke server PC.");
+            setConnectionStatus("Connected");
+        };
+
+        ws.onclose = () => {
+            say("Koneksi terputus.");
+            setConnectionStatus("Disconnected");
+            held.clear();
+        };
+
+        ws.onerror = () => {
+            say("Gagal terhubung. Periksa server Python dan alamat PC.");
+            setConnectionStatus("Error");
+        };
+    } catch (err) {
+        say(err.message);
+    }
+}
+
+document.getElementById("connectBtn").addEventListener("click", connect);
+
+document.querySelectorAll("[data-mode]").forEach(button => {
+    button.addEventListener("click", () => {
+        document.querySelectorAll("[data-mode]").forEach(b =>
+            b.classList.remove("active")
+        );
+        button.classList.add("active");
+
+        currentMode = button.dataset.mode;
+        document.getElementById("wifiBox").style.display =
+            currentMode === "wifi" ? "block" : "none";
+
+        const notes = {
+            usb: "USB menggunakan ADB reverse. Sambungkan HP ke PC dan aktifkan ADB reverse.",
+            wifi: "HP dan PC harus berada di jaringan yang sama. Kamera mungkin memerlukan HTTPS atau localhost.",
+            bluetooth: "Bluetooth belum diimplementasikan. Pilih USB atau Wi-Fi."
+        };
+
+        document.getElementById("connectionNote").textContent =
+            notes[currentMode];
+
+        if (ws) ws.close();
+    });
 });
-$("stop").addEventListener("click",stopAll);
-window.addEventListener("blur",stopAll);
-document.addEventListener("visibilitychange",()=>{if(document.hidden)stopAll()});
-$("startCam").addEventListener("click",async()=>{
- try{
-  cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:640},height:{ideal:480}},audio:false});
-  $("video").srcObject=cameraStream;$("camstatus").textContent="Aktif";
- }catch(err){alert("Kamera gagal dibuka: "+err.message+"\nPastikan izin kamera diberikan dan halaman dibuka melalui localhost.");}
+
+// Tombol kontrol mendukung mouse dan layar sentuh.
+document.querySelectorAll("[data-key]").forEach(button => {
+    const action = button.dataset.key;
+
+    const down = event => {
+        event.preventDefault();
+        button.classList.add("active");
+        keyDown(action);
+    };
+
+    const up = event => {
+        event.preventDefault();
+        button.classList.remove("active");
+        keyUp(action);
+    };
+
+    button.addEventListener("pointerdown", down);
+    button.addEventListener("pointerup", up);
+    button.addEventListener("pointercancel", up);
+    button.addEventListener("pointerleave", up);
 });
-$("stopCam").addEventListener("click",()=>{if(cameraStream)cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;$("video").srcObject=null;$("camstatus").textContent="Mati"});
-$("headToggle").addEventListener("click",async()=>{
- headTracking=!headTracking;$("headToggle").textContent="Head tracking: "+(headTracking?"ON":"OFF");$("trackstatus").textContent=headTracking?"ON (demo)":"OFF";
- await fetch("/api/settings",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({headTracking})});
+
+document.getElementById("releaseAll").addEventListener("click", releaseAll);
+
+async function loadTrackers() {
+    const vision = await FilesetResolver.forVisionTasks(
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+    );
+
+    faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
+        baseOptions: {
+            modelAssetPath:
+            "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
+        },
+        runningMode: "VIDEO",
+        numFaces: 1
+    });
+
+    handLandmarker = await HandLandmarker.createFromOptions(vision, {
+        baseOptions: {
+            modelAssetPath:
+            "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task"
+        },
+        runningMode: "VIDEO",
+        numHands: 2
+    });
+}
+
+async function startCamera() {
+    try {
+        if (!navigator.mediaDevices?.getUserMedia) {
+            throw new Error("Browser tidak mendukung akses kamera di alamat ini. Gunakan localhost atau HTTPS.");
+        }
+
+        if (!faceLandmarker || !handLandmarker) {
+            say("Memuat sistem AI tracking...");
+            await loadTrackers();
+        }
+
+        stream = await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: {
+                facingMode: cameraFacing,
+                width: {ideal: 640},
+                height: {ideal: 480}
+            }
+        });
+
+        video.srcObject = stream;
+        await video.play();
+
+        placeholder.style.display = "none";
+        document.getElementById("cameraLabel").textContent = "CAMERA ACTIVE";
+        say("Kamera aktif. Tracking berjalan.");
+        trackingLoop = true;
+        requestAnimationFrame(trackFrame);
+    } catch (err) {
+        say("Kamera gagal: " + err.message);
+    }
+}
+
+function stopCamera() {
+    trackingLoop = false;
+
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+
+    video.srcObject = null;
+    placeholder.style.display = "grid";
+    document.getElementById("cameraLabel").textContent = "CAMERA OFF";
+    document.getElementById("headStatus").textContent = "Not detected";
+    document.getElementById("handStatus").textContent = "Not detected";
+}
+
+document.getElementById("startCamera").addEventListener("click", startCamera);
+document.getElementById("stopCamera").addEventListener("click", stopCamera);
+
+document.getElementById("flipCamera").addEventListener("click", async () => {
+    cameraFacing = cameraFacing === "user" ? "environment" : "user";
+    const wasRunning = !!stream;
+    stopCamera();
+    if (wasRunning) await startCamera();
 });
-$("calibrate").addEventListener("click",()=>{neutral=null;alert("Kalibrasi dasar direset. Deteksi landmark kepala belum diaktifkan pada build awal.")});
-connectWS();
+
+function trackFrame() {
+    if (!trackingLoop || video.readyState < 2) {
+        if (trackingLoop) requestAnimationFrame(trackFrame);
+        return;
+    }
+
+    const now = performance.now();
+
+    try {
+        const face = faceLandmarker.detectForVideo(video, now);
+        const hands = handLandmarker.detectForVideo(video, now);
+
+        let head = null;
+
+        if (face.faceLandmarks?.length) {
+            const nose = face.faceLandmarks[0][1];
+            head = {x: nose.x, y: nose.y, z: nose.z};
+
+            document.getElementById("headStatus").textContent =
+                "Detected ✓";
+        } else {
+            document.getElementById("headStatus").textContent =
+                "Not detected";
+        }
+
+        let handDetected = false;
+
+        if (hands.landmarks?.length) {
+            handDetected = true;
+            document.getElementById("handStatus").textContent =
+                hands.landmarks.length + " hand(s) detected";
+
+            // Deteksi kepalan sederhana dari jarak ujung jari ke pergelangan.
+            const hand = hands.landmarks[0];
+            const wrist = hand[0];
+            const tips = [8, 12, 16, 20];
+
+            const distances = tips.map(index => {
+                const dx = hand[index].x - wrist.x;
+                const dy = hand[index].y - wrist.y;
+                return Math.sqrt(dx * dx + dy * dy);
+            });
+
+            const fist = distances.every(distance => distance < 0.25);
+
+            if (fist && now - lastJumpTime > 1200) {
+                keyDown("jump");
+                setTimeout(() => keyUp("jump"), 180);
+                lastJumpTime = now;
+            }
+        } else {
+            document.getElementById("handStatus").textContent =
+                "Not detected";
+        }
+
+        if (now - lastTrackingSend > 80) {
+            send({
+                type: "tracking",
+                head,
+                hand_detected: handDetected
+            });
+            lastTrackingSend = now;
+        }
+    } catch (err) {
+        console.warn("Tracking:", err);
+    }
+
+    requestAnimationFrame(trackFrame);
+}
+
+async function checkServer() {
+    try {
+        const response = await fetch("/api/status");
+        if (response.ok) {
+            document.getElementById("serverStatus").textContent = "Online";
+        } else {
+            document.getElementById("serverStatus").textContent = "Offline";
+        }
+    } catch {
+        document.getElementById("serverStatus").textContent = "Unknown";
+    }
+}
+
+checkServer();
 </script>
 </body>
 </html>
